@@ -35,20 +35,20 @@ const InvoicePaymentPay = ({ web3auth, account }: RouterProps) => {
             <h1>Invoice Payment Pay</h1>
             <br />
             <Table aria-label="My invoices">
-            <TableHeader>
-                <TableColumn>Id</TableColumn>
-                <TableColumn>Brand</TableColumn>
-                <TableColumn>Price</TableColumn>
-            </TableHeader>
-            <TableBody>
-            {invoices.map((invoice: any) => (
-                <TableRow key={invoice.id}>
-                    <TableCell>{invoice.name}</TableCell>
-                    <TableCell>{invoice.role}</TableCell>
-                    <TableCell>{invoice.status}</TableCell>
-                </TableRow>
-            ))}
-            </TableBody>
+                <TableHeader>
+                    <TableColumn>Id</TableColumn>
+                    <TableColumn>Brand</TableColumn>
+                    <TableColumn>Price</TableColumn>
+                </TableHeader>
+                <TableBody>
+                {invoices.map((invoice: any) => (
+                    <TableRow key={invoice.id}>
+                        <TableCell>{invoice.name}</TableCell>
+                        <TableCell>{invoice.role}</TableCell>
+                        <TableCell>{invoice.status}</TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
             </Table>
         </div>
     )
