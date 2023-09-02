@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NextUIProvider, Button, Spinner } from "@nextui-org/react";
+import { NextUIProvider, Button, Spinner, User } from "@nextui-org/react";
 import { Web3Auth } from "@web3auth/modal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
@@ -36,6 +36,7 @@ function App() {
   const [privateKey, setPrivateKey] = useState("");
   const [account, setAccount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -263,9 +264,22 @@ function App() {
     console.log("account:", accounts.toString());
   };
 
+  const getUserInfo = async () => {
+    if (!provider || !web3auth) {
+      return("web3auth not initialized yet");
+    }
+    else {
+      const user = await web3auth.getUserInfo();
+      console.log("user:", user.profileImage);
+      setUser(user)
+      return(user);
+    }
+  };
+
   useEffect(() => {
     getPrivateKey();
     getAccounts();
+    getUserInfo();
   }, [provider]);
 
   const handleMouseEnter = () => {
@@ -281,9 +295,10 @@ function App() {
   interface RouterProps {
     logout: () => void;
     login: () => void;
+    user: any;
   }
 
-  const Navbar = ({ logout, login }: RouterProps) => {
+  const Navbar = ({ logout, login, user }: RouterProps) => {
     return (
       <nav>Alexandre Gros
         <ul className="navbar">
@@ -296,19 +311,21 @@ function App() {
             :
             (
               <>
-            <li>
-                {
-                    loggedIn ? (
-                      <Button onClick={logout}>Logout</Button>
-                    ) : (
-                      <Button onClick={login}>Login</Button>
-                    )
-                }
-            </li>
-            {
+              {
                 loggedIn ? (
                   <>
+                    {
+                      user !== null &&
+                      <div className="flex-100 radius-full margin-bottom-50">
+                        <img src={user.profileImage} alt="profileImage" width="40" height="40" />
+                        <User
+                          name={user.name}
+                          description={user.email}
+                        />
+                      </div>
+                    }
                     <li className='navbar_element'>
+                      <i className="fa fa-home"></i>
                       <Link to="/dashboard">Dashboard</Link>
                     </li>
                     <li
@@ -316,35 +333,48 @@ function App() {
                       onMouseEnter={handleMouseEnter}
                       onMouseLeave={handleMouseLeave}
                     >
+                      <i className="fa fa-dollar"></i>
                       <Link to="/invoice_payments">Invoice Payments</Link>
                       {showSubElements && (
                         <ul className='navbar_sublist'>
                           <li className='navbar_subelement'>
-                            <Link to="/invoice_payments/create">Create Invoice Payment</Link>
+                            <Link to="/invoice_payment/create">Create Invoice Payment</Link>
                           </li>
                           <li className='navbar_subelement'>
-                            <Link to="/invoice_payments/update">Update Invoice Payment</Link>
+                            <Link to="/invoice_payment/update">Update Invoice Payment</Link>
                           </li>
                           <li className='navbar_subelement'>
-                            <Link to="/invoice_payments/pay">Pay Invoice Payment</Link>
+                            <Link to="/invoice_payment/pay">Pay Invoice Payment</Link>
                           </li>
                         </ul>
                       )}
                     </li>
                     <li className='navbar_element'>
+                      <i className="fa fa-address-book"></i>
                       <Link to="/contact">Contacts</Link>
                     </li>
                     <li className='navbar_element navbar_bottom'>
+                      <i className="fa fa-info-circle"></i>
                       <Link to="/about_us">About us</Link>
                     </li>
                     <li className='navbar_element navbar_bottom'>
+                      <i className="fa fa-cog"></i>
                       <Link to="/settings">Settings</Link>
                     </li>
                   </>
                 ) : (
                   <></>
                 )
-            }
+              }
+              <li>
+                  {
+                      loggedIn ? (
+                        <Button fullWidth onClick={logout}>Logout</Button>
+                      ) : (
+                        <Button fullWidth onClick={login}>Login</Button>
+                      )
+                  }
+              </li>
             </>
             )
           }
@@ -356,7 +386,7 @@ function App() {
   return (
     <NextUIProvider>
       <BrowserRouter>
-        <Navbar logout={logout} login={login} />
+        <Navbar logout={logout} login={login} user={user} />
         <Router web3auth={web3auth} account={account} provider={provider} />
       </BrowserRouter>
     </NextUIProvider>

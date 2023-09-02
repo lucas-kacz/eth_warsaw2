@@ -81,4 +81,4 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
     )
 }
 
-export default InvoicePaymentCreate
+export default InvoicePaymentCreate;
