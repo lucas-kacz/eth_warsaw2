@@ -34,8 +34,8 @@ async function createRequest(req, res){
             requestInfo: {
             currency: {
                 type: Types.RequestLogic.CURRENCY.ERC20,
-                value: "0xF194afDf50B03e69Bd7D057c1Aa9e10c9954E4C9",
-                network: "alfajores",
+                value: "0x65aFADD39029741B3b8f0756952C74678c9cEC93",
+                network: "goerli",
             },
             expectedAmount: "10",
             payee: {
@@ -51,7 +51,7 @@ async function createRequest(req, res){
             paymentNetwork: {
             id: Types.Extension.PAYMENT_NETWORK_ID.ERC20_FEE_PROXY_CONTRACT,
             parameters: {
-                paymentNetworkName: "alfajores",
+                paymentNetworkName: "goerli",
                 paymentAddress: paymentRecipient,
                 feeAddress: feeRecipient,
                 feeAmount: "0",
