@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import RPC from "../utils/ethersRPC";
 import { Button, Input, Card, CardBody } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom";
 
 interface RouterProps {
     web3auth: any;
@@ -13,6 +14,8 @@ const Dashboard = ({ web3auth }: RouterProps) => {
     const [brand, setBrand] = useState<any>(null);
     const [myBrand, setMyBrand] = useState<any>(null);
     const [role, setRole] = useState<any>(null);
+
+    const navigate = useNavigate();
 
     var Airtable = require('airtable');
     Airtable.configure({
@@ -135,6 +138,23 @@ const Dashboard = ({ web3auth }: RouterProps) => {
                 <div className="card">
                     <p>You are KYB verified</p>
                     <p className="uppercase">{role} of {brand}</p>
+                </div>
+            }
+            {
+                brand !== "none" &&
+                <div className="flex align-left margin-0-auto">
+                    <Button onClick={() => navigate("/invoice_payment/create")} size="lg" color="success">
+                        <i className="fa fa-plus"></i>
+                        Create Invoice Payment
+                    </Button>
+                    <Button onClick={() => navigate("/invoice_payment/pay")} size="lg" color="secondary">
+                        <i className="fa fa-money"></i>
+                        Pay Invoice Payment
+                    </Button>
+                    <Button onClick={() => navigate("/invoice_payment/update")} size="lg" color="primary">
+                        <i className="fa fa-edit"></i>
+                        Update Invoice Payment
+                    </Button>
                 </div>
             }
         </div>

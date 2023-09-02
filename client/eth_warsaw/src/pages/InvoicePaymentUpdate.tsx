@@ -6,8 +6,9 @@ interface RouterProps {
 const InvoicePaymentUpdate = ({ web3auth, account }: RouterProps) => {
     return (
         <div className="page">
-            <h1>InvoicePaymentUpdate</h1>
-            <p>{account}</p>
+            <h1>Invoice Payment Update</h1>
+            <br />
+
         </div>
     )
 }

@@ -99,9 +99,6 @@ function App() {
         });
         web3auth.configureAdapter(openloginAdapter);
 
-        // plugins and adapters are optional and can be added as per your requirement
-        // read more about plugins here: https://web3auth.io/docs/sdk/web/plugins/
-
         // adding torus wallet connector plugin
 
         const torusPlugin = new TorusWalletConnectorPlugin({
@@ -118,18 +115,6 @@ function App() {
         });
         setTorusPlugin(torusPlugin);
         await web3auth.addPlugin(torusPlugin);
-
-        // read more about adapters here: https://web3auth.io/docs/sdk/web/adapters/
-
-        // adding wallet connect v1 adapter
-        // const walletConnectV1Adapter = new WalletConnectV1Adapter({
-        //   adapterSettings: {
-        //     bridge: "https://bridge.walletconnect.org",
-        //   },
-        //   clientId,
-        // });
-
-        // web3auth.configureAdapter(walletConnectV1Adapter);
 
         // adding wallet connect v2 adapter
         const defaultWcSettings = await getWalletConnectV2Settings(
@@ -180,33 +165,6 @@ function App() {
 
         await web3auth.initModal();
 
-        // await web3auth.initModal({
-        //   modalConfig: {
-        //     [WALLET_ADAPTERS.OPENLOGIN]: {
-        //       label: "openlogin",
-        //       loginMethods: {
-        //         // Disable facebook and reddit
-        //         facebook: {
-        //           name: "facebook",
-        //           showOnModal: false
-        //         },
-        //         reddit: {
-        //           name: "reddit",
-        //           showOnModal: false
-        //         },
-        //         // Disable email_passwordless and sms_passwordless
-        //         email_passwordless: {
-        //           name: "email_passwordless",
-        //           showOnModal: false
-        //         },
-        //         sms_passwordless: {
-        //           name: "sms_passwordless",
-        //           showOnModal: false
-        //         }
-        //       }
-        //     }
-        //   }
-        // });
         setProvider(web3auth.provider);
 
         if (web3auth.connected) {
@@ -221,15 +179,19 @@ function App() {
   }, []);
 
   const login = async () => {
-    setLoading(true);
-    if (!web3auth) {
-      return("web3auth not initialized yet");
+    try {
+      setLoading(true);
+      if (!web3auth) {
+        return("web3auth not initialized yet");
+      }
+      const web3authProvider = await web3auth.connect();
+      setProvider(web3authProvider);
+      setLoading(false);
+      setLoggedIn(true);
+      window.location.href = "/";
+    } catch (error) {
+      console.error(error);
     }
-    const web3authProvider = await web3auth.connect();
-    setProvider(web3authProvider);
-    setLoading(false);
-    setLoggedIn(true);
-    window.location.href = "/dashboard";
   };
 
   const logout = async () => {
@@ -245,42 +207,63 @@ function App() {
   };
 
   const getPrivateKey = async () => {
-    if (!provider) {
-        return;
+    try {
+      if (!provider || !web3auth) {
+          return;
+      }
+      const rpc = new RPC(provider);
+      const privateKey = await rpc.getPrivateKey();
+      console.log("privateKey1:", privateKey);
+      setPrivateKey(privateKey);
+    } catch (error) {
+      console.error(error);
     }
-    const rpc = new RPC(provider);
-    const privateKey = await rpc.getPrivateKey();
-    console.log("privateKey1:", privateKey);
-    setPrivateKey(privateKey);
   };
 
   const getAccounts = async () => {
-    if (!provider) {
-        return;
+    try {
+      if (!provider || !web3auth) {
+          return;
+      }
+      const rpc = new RPC(provider);
+      const accounts = await rpc.getAccounts();
+      setAccount(accounts.toString());
+      console.log("account:", accounts.toString());
+    } catch (error) {
+      console.error(error);
     }
-    const rpc = new RPC(provider);
-    const accounts = await rpc.getAccounts();
-    setAccount(accounts.toString());
-    console.log("account:", accounts.toString());
   };
 
   const getUserInfo = async () => {
-    if (!provider || !web3auth) {
-      return("web3auth not initialized yet");
-    }
-    else {
-      const user = await web3auth.getUserInfo();
-      console.log("user:", user.profileImage);
-      setUser(user)
-      return(user);
+    try {
+      if (!provider || !web3auth) {
+        return("web3auth not initialized yet");
+      }
+      else {
+        try {
+        const user = await web3auth.getUserInfo();
+        console.log("user:", user.profileImage);
+        setUser(user)
+        return(user);
+        }
+        catch (error) {
+          console.error(error);
+        }
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    getPrivateKey();
-    getAccounts();
-    getUserInfo();
-  }, [provider]);
+    try {
+      getPrivateKey();
+      getAccounts();
+      getUserInfo();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [provider, web3auth]);
 
   const handleMouseEnter = () => {
     setShowSubElements(true);
@@ -326,7 +309,7 @@ function App() {
                     }
                     <li className='navbar_element'>
                       <i className="fa fa-home"></i>
-                      <Link to="/dashboard">Dashboard</Link>
+                      <Link to="/">Dashboard</Link>
                     </li>
                     <li
                       className='navbar_element'

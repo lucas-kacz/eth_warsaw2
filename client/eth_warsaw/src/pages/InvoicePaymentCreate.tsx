@@ -4,7 +4,7 @@ import RPC from "../utils/ethersRPC"
 import { CHAIN_NAMESPACES, SafeEventEmitterProvider } from "@web3auth/base";
 import { Web3Auth } from "@web3auth/modal";
 import { create } from "domain";
-import { Button } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem, Spinner } from "@nextui-org/react";
 
 interface RouterProps {
     web3auth: any;
@@ -20,6 +20,7 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [payeeIdentity, setPayeeIdentity] = useState("")
     const [privateKey, setPrivateKey] = useState("");
+    const [brands, setBrands] = useState<any>([]);
 
     const navigate = useNavigate();
 
@@ -67,16 +68,58 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
         });
     }
 
+    function getAllBrands() {
+        var Airtable = require('airtable');
+        Airtable.configure({
+            endpointUrl: 'https://api.airtable.com',
+            apiKey: process.env.REACT_APP_AIRTABLE_API || "",
+        });
+        var base = Airtable.base('appFQhXiLloPeeAQC');
+        var brands: any = [];
+        base('Data').select({
+            view: "Grid view",
+        }).eachPage(function page(records: any, fetchNextPage: any) {
+            records.forEach(function(record: any) {
+                brands.push(record.get('brand'));
+            });
+            fetchNextPage();
+        }, function done(err: any) {
+            if (err) { console.error(err); return; }
+        });
+        setBrands(brands);
+    }
+
+    useEffect(() => {
+        getAllBrands();
+    }, []);
+
     return(
         <div className="page">
             <h1>Invoice Payment Create</h1>
-            <input type="text" name="payeeIdentity" onChange={(e) => setPayeeIdentity(e.target.value)}></input>
-            <br/>
-            {payeeIdentity}
-            <br/>
-            {privateKey}
-            <br/>
-            <Button onClick={createPayment}>Create Payment</Button>
+            <br />
+            {
+              brands.length > 0 &&
+              <div className="flex">
+                <Select
+                  label="brands"
+                  placeholder="Select a brand"
+                  className="max-w-xs width-75"
+                >
+                  {brands.map((brand : any, index : any) => (
+                    <SelectItem key={index} value={brand}>
+                      {brand}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Button onClick={createPayment} className="width-25">Create Payment</Button>
+              </div>
+            }
+            {
+              brands.length === 0 &&
+              <Spinner
+                color="primary"
+              />
+            }
         </div>
     )
 }
