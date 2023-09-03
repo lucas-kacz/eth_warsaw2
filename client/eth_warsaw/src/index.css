@@ -202,3 +202,7 @@ nav ul li i {
   margin: 0 auto !important;
   width: fit-content !important;
 }
+
+.disabled:hover {
+  cursor: not-allowed !important;
+}

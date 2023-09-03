@@ -21,6 +21,27 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
     const [payeeIdentity, setPayeeIdentity] = useState("")
     const [privateKey, setPrivateKey] = useState("");
     const [brands, setBrands] = useState<any>([]);
+    const [payer, setPayer] = useState<any>(null);
+    const [currency, setCurrency] = useState<any>(null);
+    const [amount, setAmount] = useState<any>(null);
+
+    const allCurrencies = {
+        ETH: "ethereum",
+        BTC: "bitcoin",
+        USDC: "usdc",
+        DAI: "dai",
+        USDT: "usdt",
+        BUSD: "busd",
+        BNB: "bnb",
+        GOERLI: "goerli",
+        MATIC: "matic",
+        POLYGON: "polygon",
+        XDAI: "xdai",
+        SEPOLIA: "sepolia",
+        RINKEBY: "rinkeby",
+        KOVAN: "kovan",
+        BSC: "bsc",
+    }
 
     const navigate = useNavigate();
 
@@ -101,9 +122,10 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
               brands.length > 0 &&
               <div className="flex">
                 <Select
-                  label="brands"
+                  label="Payer"
                   placeholder="Select a brand"
-                  className="max-w-xs width-75"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setPayer(e.target.value)}
                 >
                   {brands.map((brand : any, index : any) => (
                     <SelectItem key={index} value={brand}>
@@ -111,7 +133,30 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
                     </SelectItem>
                   ))}
                 </Select>
-                <Button onClick={createPayment} className="width-25">Create Payment</Button>
+                <Select
+                  label="Currencies"
+                  placeholder="Select a currency"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setCurrency(e.target.value)}
+                >
+                  {Object.keys(allCurrencies).map((currency : any, index : any) => (
+                    <SelectItem key={index} value={currency}>
+                      {currency}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Input
+                  label="Amount"
+                  placeholder="Enter an amount"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                {
+                  payer !== null && currency !== null && amount !== null ?
+                  <Button onClick={createPayment} className="width-25" color="success">Create Payment</Button>
+                  :
+                  <Button onClick={createPayment} className="width-25 disabled" disabled>Create Payment</Button>
+                }
               </div>
             }
             {
