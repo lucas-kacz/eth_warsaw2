@@ -18,42 +18,24 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
     const { Types, Utils } = require("@requestnetwork/request-client.js"); 
 
     const [loggedIn, setLoggedIn] = useState(false);
-    const [payeeIdentity, setPayeeIdentity] = useState("")
     const [privateKey, setPrivateKey] = useState("");
     const [brands, setBrands] = useState<any>([]);
     const [payer, setPayer] = useState<any>(null);
     const [currency, setCurrency] = useState<any>(null);
     const [amount, setAmount] = useState<any>(null);
+	const [selectedPayer, setSelectedPayer] = useState<any>([]);
+	const [reason, setReason] = useState<any>(null);
+	const [dueDate, setDueDate] = useState<any>(null);
 
     const allCurrencies = {
-        ETH: "ethereum",
-        BTC: "bitcoin",
-        USDC: "usdc",
-        DAI: "dai",
-        USDT: "usdt",
-        BUSD: "busd",
-        BNB: "bnb",
-        GOERLI: "goerli",
-        MATIC: "matic",
-        POLYGON: "polygon",
-        XDAI: "xdai",
-        SEPOLIA: "sepolia",
-        RINKEBY: "rinkeby",
-        KOVAN: "kovan",
-        BSC: "bsc",
-    }
-
-    const navigate = useNavigate();
-
-    const paymentRecipient = payeeIdentity;
-    const payerIdentity = payeeIdentity;
-    const feeRecipient = "0x0000000000000000000000000000000000000000";
-
-    console.log("privateKey3: ", privateKey);
+		ETH: "ethereum",
+		USDC: "usdc",
+		GOERLI: "goerli",
+	};
 
     useEffect(() => {
         getPrivateKey();
-      }, [web3auth.provider]);
+    }, [web3auth.provider]);
 
     const getPrivateKey = async () => {
         if (!web3auth.provider) {
@@ -65,50 +47,56 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
         setPrivateKey(('0x'+privateKey));
         console.log(typeof(privateKey))
         console.log("privateKey1Create:", privateKey);
-      };
-    
-    const epkSignatureProvider = new EthereumPrivateKeySignatureProvider({
-        method: Types.Signature.METHOD.ECDSA,
-        privateKey: "0x10adcce71a2b0c4c4c31c257ea0555f9a1ccdb99b6a91e3e8e930124c0c6995a",
-    });
+    };
 
-    async function createPayment(){
-      await fetch("http://127.0.0.1:3000/api/createRequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(epkSignatureProvider),
-      })
+    async function createPayment() {
+		const requestData = {
+			prvKey: privateKey,
+			payeeIdentity: account,
+			payerIdentity: selectedPayer[0],
+			currency: currency,
+			amount: amount
+		}
+		console.log(JSON.stringify(requestData))
+		await fetch("http://localhost:5000/api/create_request", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(requestData),
+		})
         .then((response) => response.json())
         .then((data) => {
             console.log("data:", data);
-          })
+        })
         .catch((error) => {
-          console.error("Error:", error);
+          	console.error("Error:", error);
         });
     }
 
     function getAllBrands() {
-        var Airtable = require('airtable');
-        Airtable.configure({
-            endpointUrl: 'https://api.airtable.com',
-            apiKey: process.env.REACT_APP_AIRTABLE_API || "",
-        });
-        var base = Airtable.base('appFQhXiLloPeeAQC');
-        var brands: any = [];
-        base('Data').select({
-            view: "Grid view",
-        }).eachPage(function page(records: any, fetchNextPage: any) {
-            records.forEach(function(record: any) {
-                brands.push(record.get('brand'));
-            });
-            fetchNextPage();
-        }, function done(err: any) {
-            if (err) { console.error(err); return; }
-        });
-        setBrands(brands);
-    }
+		var Airtable = require('airtable');
+		Airtable.configure({
+			endpointUrl: 'https://api.airtable.com',
+			apiKey: process.env.REACT_APP_AIRTABLE_API || "",
+		});
+		var base = Airtable.base('appFQhXiLloPeeAQC');
+		var brands: any = [];
+		var selectedPayer: any = [];
+		base('Data').select({
+			view: "Grid view",
+		}).eachPage(function page(records: any, fetchNextPage: any) {
+			records.forEach(function(record: any) {
+				brands.push(record.get('brand'));
+				selectedPayer.push(record.get('address'));
+			});
+			fetchNextPage();
+		}, function done(err: any) {
+			 if (err) { console.error(err); return; }
+		});
+		setBrands(brands);
+		setSelectedPayer(selectedPayer);
+	}
 
     useEffect(() => {
         getAllBrands();
@@ -133,23 +121,38 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
                     </SelectItem>
                   ))}
                 </Select>
-                <Select
-                  label="Currencies"
-                  placeholder="Select a currency"
-                  className="max-w-xs width-25"
-                  onChange={(e) => setCurrency(e.target.value)}
-                >
-                  {Object.keys(allCurrencies).map((currency : any, index : any) => (
-                    <SelectItem key={index} value={currency}>
-                      {currency}
-                    </SelectItem>
-                  ))}
-                </Select>
+				<Select
+					label="Currencies"
+					placeholder="Select a currency"
+					className="max-w-xs width-25"
+					onChange={(e) => {
+						let crypto : number = parseInt(e.target.value)
+						setCurrency(Object.values(allCurrencies)[crypto]);
+					}}
+				>
+					{Object.keys(allCurrencies).map((currencyKey, index) => (
+						<SelectItem key={index} value={currencyKey}>
+							{currencyKey}
+						</SelectItem>
+					))}
+				</Select>
                 <Input
                   label="Amount"
                   placeholder="Enter an amount"
                   className="max-w-xs width-25"
                   onChange={(e) => setAmount(e.target.value)}
+                />
+				<Input
+                  label="Reason"
+                  placeholder="Enter the reason"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setReason(e.target.value)}
+                />
+				<Input
+                  label="Due Date"
+                  placeholder="Enter a due date (YYYY.MM.DD)"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setDueDate(e.target.value)}
                 />
                 {
                   payer !== null && currency !== null && amount !== null ?

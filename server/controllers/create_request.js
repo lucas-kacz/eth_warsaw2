@@ -1,85 +1,89 @@
-const {
-    RequestNetwork,
-    Types,
-    Utils,
-  } = require("@requestnetwork/request-client.js");
-  const {
-    EthereumPrivateKeySignatureProvider,
-  } = require("@requestnetwork/epk-signature");
-  const { config } = require("dotenv");
+const { RequestNetwork, Types, Utils } = require("@requestnetwork/request-client.js");
+const { EthereumPrivateKeySignatureProvider } = require("@requestnetwork/epk-signature");
+const currencies = require("./cryptoCurrencies.json");
 
-  // Load environment variables from .env file (without overriding variables already set)
-  config();
+async function createRequest(req, res) {
+	function getValueByNetwork(networkName) {
+		const networkEntry = currencies.find(entry => entry.network === networkName);
+		return networkEntry ? networkEntry.value : null;
+	}
+  	try {
+		console.log("PRVKEY", req.body.prvKey)
+		console.log("PAYEEIDENTITY", req.body.payeeIdentity)
+		console.log("PAYERIDENTITY", req.body.payerIdentity)
+		console.log("CURRENCY_NETWORK", req.body.currency)
+		console.log("CURRENCY_VALUE", getValueByNetwork(req.body.currency))
+		console.log("AMOUNT", req.body.amount)
+		console.log("DUEDATE", req.body.dueDate)
+		console.log('REASON', req.body.reason)
 
-  const epkSignatureProvider = new EthereumPrivateKeySignatureProvider({
-    method: Types.Signature.METHOD.ECDSA,
-    privateKey: "0x75183db23f10504c6aca36ebb3ef2f0bfb6d74b136f014b9c0f74904b2ee1423", // Must include 0x prefix
-  });
+		const epkSignatureProvider = new EthereumPrivateKeySignatureProvider({
+			method: Types.Signature.METHOD.ECDSA,
+			privateKey: req.body.prvKey,
+		});
 
-  const requestClient = new RequestNetwork({
-    nodeConnectionConfig: {
-      baseURL: "https://goerli.gateway.request.network/",
-    },
-    signatureProvider: epkSignatureProvider,
-  });
+		const requestClient = new RequestNetwork({
+			nodeConnectionConfig: {
+				baseURL: "https://goerli.gateway.request.network/",
+			},
+			signatureProvider: epkSignatureProvider,
+		});
 
-async function createRequest(req, res){
-    try{
-        const payeeIdentity = "0x2B1a884Dc7a8f0cc17939928895D9D7cb9146074";
-        const payerIdentity = payeeIdentity;
-        const paymentRecipient = payeeIdentity;
-        const feeRecipient = "0x0000000000000000000000000000000000000000";
-        
-        const requestCreateParameters = {
-            requestInfo: {
-            currency: {
-                type: Types.RequestLogic.CURRENCY.ERC20,
-                value: "0x65aFADD39029741B3b8f0756952C74678c9cEC93",
-                network: "goerli",
-            },
-            expectedAmount: "10",
-            payee: {
-                type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
-                value: payeeIdentity,
-            },
-            payer: {
-                type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
-                value: payerIdentity,
-            },
-            timestamp: Utils.getCurrentTimestampInSecond(),
-            },
-            paymentNetwork: {
-            id: Types.Extension.PAYMENT_NETWORK_ID.ERC20_FEE_PROXY_CONTRACT,
-            parameters: {
-                paymentNetworkName: "goerli",
-                paymentAddress: paymentRecipient,
-                feeAddress: feeRecipient,
-                feeAmount: "0",
-            },
-            },
-            contentData: {
-            reason: "🍕",
-            dueDate: "2023.06.16",
-            },
-            signer: {
-            type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
-            value: payeeIdentity,
-            },
-        };        
+		const payeeIdentity = req.body.payeeIdentity;
+		const payerIdentity = req.body.payerIdentity;
+		const paymentRecipient = req.body.payerIdentity;
+		const feeRecipient = "0x0000000000000000000000000000000000000000";
+      
+      	const requestCreateParameters = {
+			requestInfo: {
+				currency: {
+					type: Types.RequestLogic.CURRENCY.ERC20,
+					value: getValueByNetwork(req.body.currency),
+					network: 'goerli',
+				},
+          		expectedAmount: req.body.amount,
+				payee: {
+					type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+					value: payeeIdentity,
+				},
+				payer: {
+					type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+					value: payerIdentity,
+				},
+          		timestamp: Utils.getCurrentTimestampInSecond(),
+          	},
+			paymentNetwork: {
+				id: Types.Extension.PAYMENT_NETWORK_ID.ERC20_FEE_PROXY_CONTRACT,
+				parameters: {
+					paymentNetworkName: 'goerli',
+					paymentAddress: paymentRecipient,
+					feeAddress: feeRecipient,
+					feeAmount: "0",
+				},
+			},
+			contentData: {
+				reason: req.body.reason,
+				dueDate: req.body.dueDate,
+			},
+			signer: {
+				type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+				value: payeeIdentity,
+			},
+      	};        
 
-        const request = await requestClient.createRequest(requestCreateParameters);
-        const requestData = await request.waitForConfirmation();
-        console.log(JSON.stringify(requestData))        
+		const request = await requestClient.createRequest(requestCreateParameters);
+		const requestData = await request.waitForConfirmation();
+		console.log(JSON.stringify(requestData))        
 
-        res.status(200)
-        res.json(requestData)
-    } catch (error) {
-        res.status(500)
-        res.json({error : error.message})
-    }
+		res.status(200)
+		res.json(requestData)
+	} catch (error) {
+		res.status(500)
+		res.json({error : error.message})
+	}
 }
 
-  
+
 module.exports = {
-    createRequest
+  createRequest
 }
