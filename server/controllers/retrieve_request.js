@@ -48,25 +48,79 @@ async function sortAll(data){
 async function sortPending(data){
     var list = []
 
-    for(var i = 0; i<data.length; i++){
-        var currencyContract = new web3.eth.Contract(ERC20ABI, data[i].currencyInfo.value)
+   for(var i = 0; i<data.length; i++){
+        if(parseInt(data[i].balance.balance) === 0){    
+            try{
+                var currencyContract = new web3.eth.Contract(ERC20ABI, data[i].currencyInfo.value)
 
-        const tokenName = await currencyContract.methods.name().call()
-        const tokenSymbol = await currencyContract.methods.symbol().call()
+                const tokenName = await currencyContract.methods.name().call()
+                const tokenSymbol = await currencyContract.methods.symbol().call()
 
-        if(data[i].balance.balance === 0 || data[i].balance.balance === null){
-            var requestData = Object()
-            requestData.requestId = data[i].requestId
-            requestData.currencyAddress = data[i].currencyInfo.value
-            requestData.tokenName = tokenName
-            requestData.tokenSymbol = tokenSymbol
-            requestData.expectedAmount = data[i].expectedAmount
-            requestData.payeeAddress = data[i].payee.value
-            requestData.payerAddress = data[i].payer.value
-            requestData.timestamp = data[i].timestamp
-            requestData.balance = data[i].balance.balance
+                console.log(tokenName)
 
-            list.push(requestData)
+                var requestData = Object()
+                requestData.requestId = data[i].requestId
+                requestData.currencyAddress = data[i].currencyInfo.value
+                requestData.tokenName = tokenName
+                requestData.tokenSymbol = tokenSymbol
+                requestData.expectedAmount = data[i].expectedAmount
+                requestData.payeeAddress = data[i].payee.value
+                requestData.payerAddress = data[i].payer.value
+                requestData.timestamp = data[i].timestamp
+                requestData.balance = parseInt(data[i].balance.balance)
+
+                // if(data[i].balance.balance === 0 || data[i].balance.balance === null){
+                //     list.push(requestData)
+                // } else {
+                //     console.log("error")
+                // }
+                list.push(requestData)
+                
+            } catch(error){
+                console.log(error)
+                continue;
+            }
+        }
+    }
+
+    return list
+}
+
+async function sortPaid(data){
+    var list = []
+
+   for(var i = 0; i<data.length; i++){
+        if(parseInt(data[i].balance.balance) > 0){    
+            try{
+                var currencyContract = new web3.eth.Contract(ERC20ABI, data[i].currencyInfo.value)
+
+                const tokenName = await currencyContract.methods.name().call()
+                const tokenSymbol = await currencyContract.methods.symbol().call()
+
+                console.log(tokenName)
+
+                var requestData = Object()
+                requestData.requestId = data[i].requestId
+                requestData.currencyAddress = data[i].currencyInfo.value
+                requestData.tokenName = tokenName
+                requestData.tokenSymbol = tokenSymbol
+                requestData.expectedAmount = data[i].expectedAmount
+                requestData.payeeAddress = data[i].payee.value
+                requestData.payerAddress = data[i].payer.value
+                requestData.timestamp = data[i].timestamp
+                requestData.balance = parseInt(data[i].balance.balance)
+
+                // if(data[i].balance.balance === 0 || data[i].balance.balance === null){
+                //     list.push(requestData)
+                // } else {
+                //     console.log("error")
+                // }
+                list.push(requestData)
+                
+            } catch(error){
+                console.log(error)
+                continue;
+            }
         }
     }
 
@@ -83,6 +137,26 @@ async function retrievePendingRequest(req, res){
         const requestDatas = requests.map((request) => request.getData());
 
         const data = await sortPending(requestDatas)
+        //console.log(JSON.stringify(requestDatas));
+
+        res.status(200)
+        res.json(data)
+    } catch (error) {
+        res.status(500)
+        res.json({error : error.message})
+    }
+}
+
+async function retrievePaidRequests(req, res){
+    try{
+        const identity = req.params.address;
+        const requests = await requestClient.fromIdentity({
+            type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+            value: identity,
+        });
+        const requestDatas = requests.map((request) => request.getData());
+
+        const data = await sortPaid(requestDatas)
         //console.log(JSON.stringify(requestDatas));
 
         res.status(200)
@@ -115,5 +189,6 @@ async function retrieveRequest(req, res){
 
 module.exports = {
     retrieveRequest,
-    retrievePendingRequest
+    retrievePendingRequest,
+    retrievePaidRequests
 }

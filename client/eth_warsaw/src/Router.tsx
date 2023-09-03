@@ -8,6 +8,7 @@ import InvoicePaymentUpdate from "./pages/InvoicePaymentUpdate";
 import InvoiceTest from "./pages/TestPayCreate";
 import Home from "./pages/Test_Connexion";
 import AboutUs from "./pages/AboutUs";
+import PaidInvoices from "./pages/PaidInvoices";
 
 interface RouterProps {
     web3auth: any;
@@ -26,6 +27,7 @@ function Router ({ web3auth, account, provider }: RouterProps) {
             <Route path="/invoice_payment/create" element={<InvoicePaymentCreate web3auth={web3auth} account={account} />} />
             <Route path="/invoice_payment/pay" element={<InvoicePaymentPay web3auth={web3auth} account={account} />} />
             <Route path="/invoice_payment/update" element={<InvoicePaymentUpdate web3auth={web3auth} account={account} />} />
+            <Route path="/invoice_payment/paid" element={<PaidInvoices web3auth={web3auth} account={account}/>}/>
             <Route path="/about_us" element={<AboutUs />} />
         </Routes>
     )

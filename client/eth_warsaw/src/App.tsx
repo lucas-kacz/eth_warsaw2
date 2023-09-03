@@ -330,6 +330,9 @@ function App() {
                           <li className='navbar_subelement'>
                             <Link to="/invoice_payment/pay">Pay Invoice Payment</Link>
                           </li>
+                          <li className='navbar_subelement'>
+                            <Link to="/invoice_payment/paid">Paid Invoices</Link>
+                          </li>
                         </ul>
                       )}
                     </li>
