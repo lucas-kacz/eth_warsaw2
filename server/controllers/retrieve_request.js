@@ -1,3 +1,8 @@
+// const providerURL = process.env.INFURA_API_KEY
+var Web3 = require("web3")
+var web3 = new Web3("https://goerli.infura.io/v3/3af4e458905a4581879f74b2239a5852");
+
+const { ERC20ABI } = require('../constants/abi')
 
 const { RequestNetwork, Types } = require("@requestnetwork/request-client.js");
 const requestClient = new RequestNetwork({
@@ -7,24 +12,85 @@ const requestClient = new RequestNetwork({
 });
   
 
-async function sortResponse(data){
+async function sortAll(data){
     var list = []
 
     for(var i = 0; i<data.length; i++){
+        try{
+            var currencyContract = new web3.eth.Contract(ERC20ABI, data[i].currencyInfo.value)
 
-        var requestData = Object()
-        requestData.requestId = data[i].requestId
-        requestData.currency = data[i].currency
-        requestData.expectedAmount = data[i].expectedAmount
-        requestData.payeeAddress = data[i].payee.value
-        requestData.payerAddress = data[i].payer.value
-        requestData.timestamp = data[i].timestamp
-        requestData.balance = data[i].balance.balance
+            const tokenName = await currencyContract.methods.name().call()
+            const tokenSymbol = await currencyContract.methods.symbol().call()
 
-        list.push(requestData)
+            console.log(tokenName)
+
+            var requestData = Object()
+            requestData.requestId = data[i].requestId
+            requestData.currencyAddress = data[i].currencyInfo.value
+            requestData.tokenName = tokenName
+            requestData.tokenSymbol = tokenSymbol
+            requestData.expectedAmount = data[i].expectedAmount
+            requestData.payeeAddress = data[i].payee.value
+            requestData.payerAddress = data[i].payer.value
+            requestData.timestamp = data[i].timestamp
+            requestData.balance = data[i].balance.balance
+
+            list.push(requestData)
+        } catch(error){
+            console.log(error)
+            continue;
+        }
     }
 
     return list
+}
+
+async function sortPending(data){
+    var list = []
+
+    for(var i = 0; i<data.length; i++){
+        var currencyContract = new web3.eth.Contract(ERC20ABI, data[i].currencyInfo.value)
+
+        const tokenName = await currencyContract.methods.name().call()
+        const tokenSymbol = await currencyContract.methods.symbol().call()
+
+        if(data[i].balance.balance === 0 || data[i].balance.balance === null){
+            var requestData = Object()
+            requestData.requestId = data[i].requestId
+            requestData.currencyAddress = data[i].currencyInfo.value
+            requestData.tokenName = tokenName
+            requestData.tokenSymbol = tokenSymbol
+            requestData.expectedAmount = data[i].expectedAmount
+            requestData.payeeAddress = data[i].payee.value
+            requestData.payerAddress = data[i].payer.value
+            requestData.timestamp = data[i].timestamp
+            requestData.balance = data[i].balance.balance
+
+            list.push(requestData)
+        }
+    }
+
+    return list
+}
+
+async function retrievePendingRequest(req, res){
+    try{
+        const identity = req.params.address;
+        const requests = await requestClient.fromIdentity({
+            type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+            value: identity,
+        });
+        const requestDatas = requests.map((request) => request.getData());
+
+        const data = await sortPending(requestDatas)
+        //console.log(JSON.stringify(requestDatas));
+
+        res.status(200)
+        res.json(data)
+    } catch (error) {
+        res.status(500)
+        res.json({error : error.message})
+    }
 }
 
 async function retrieveRequest(req, res){
@@ -36,7 +102,7 @@ async function retrieveRequest(req, res){
         });
         const requestDatas = requests.map((request) => request.getData());
 
-        const data = await sortResponse(requestDatas)
+        const data = await sortAll(requestDatas)
         //console.log(JSON.stringify(requestDatas));
 
         res.status(200)
@@ -48,5 +114,6 @@ async function retrieveRequest(req, res){
 }
 
 module.exports = {
-    retrieveRequest
+    retrieveRequest,
+    retrievePendingRequest
 }
