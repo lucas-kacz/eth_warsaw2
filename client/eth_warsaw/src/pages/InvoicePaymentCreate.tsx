@@ -136,12 +136,6 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
 						</SelectItem>
 					))}
 				</Select>
-                <Input
-                  label="Amount"
-                  placeholder="Enter an amount"
-                  className="max-w-xs width-25"
-                  onChange={(e) => setAmount(e.target.value)}
-                />
 				<Input
                   label="Reason"
                   placeholder="Enter the reason"
@@ -153,6 +147,12 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
                   placeholder="Enter a due date (YYYY.MM.DD)"
                   className="max-w-xs width-25"
                   onChange={(e) => setDueDate(e.target.value)}
+                />
+				<Input
+                  label="Amount"
+                  placeholder="Enter an amount"
+                  className="max-w-xs width-25"
+                  onChange={(e) => setAmount(e.target.value)}
                 />
                 {
                   payer !== null && currency !== null && amount !== null ?
