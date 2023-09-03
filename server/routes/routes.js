@@ -9,7 +9,7 @@ const router = Router()
 module.exports = router
 
 
-router.get('/create_request', createRequest)
+router.post('/create_request', createRequest)
 
 router.get('/pay_request', payUserRequest)
 
