@@ -43,7 +43,8 @@ const Dashboard = ({ web3auth }: RouterProps) => {
             }, function done(err: any) {
                 if (err) { console.error(err); return; }
             });
-            if(!alreadyExists && myBrand !== null && address !== null && role !== null) {
+            if(!alreadyExists && myBrand !== null && address !== null) {
+                console.log("Creating new record");
                 base('Data').create([
                     {
                         "fields": {
