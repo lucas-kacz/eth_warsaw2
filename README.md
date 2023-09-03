@@ -42,6 +42,6 @@ http://localhost:5000
 
 ## How to use the project
 
-Click on the "Connect Wallet" button and select your wallet.
+Click on the "Login" button and select your wallet.
 
 That's it ! You are now connected to the app.
