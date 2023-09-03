@@ -46,7 +46,7 @@ function App() {
           clientId,
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0xaef3",
+            chainId: "0x5",
             rpcTarget: process.env.REACT_APP_INFURA_LINK || "",
           },
           uiConfig: {
@@ -58,7 +58,7 @@ function App() {
             loginGridCol: 3,
             primaryButton: "externalLogin", // "externalLogin" | "socialLogin" | "emailLogin"
           },
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "testnet",
         });
 
         const openloginAdapter = new OpenloginAdapter({
@@ -134,10 +134,10 @@ function App() {
         const metamaskAdapter = new MetamaskAdapter({
           clientId,
           sessionTime: 86400, // 1 day in seconds
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "testnet",
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0xaef3",
+            chainId: "0x5",
             rpcTarget: process.env.REACT_APP_INFURA_LINK || "",
           },
         });
@@ -146,10 +146,10 @@ function App() {
           sessionTime: 86400, // 1 day in seconds
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0xaef3",
+            chainId: "0x5",
             rpcTarget: process.env.REACT_APP_INFURA_LINK || "",
           },
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "testnet",
         });
 
         // it will add/update  the metamask adapter in to web3auth class

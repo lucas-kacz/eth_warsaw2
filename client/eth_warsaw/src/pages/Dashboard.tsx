@@ -14,6 +14,7 @@ const Dashboard = ({ web3auth }: RouterProps) => {
     const [brand, setBrand] = useState<any>(null);
     const [myBrand, setMyBrand] = useState<any>(null);
     const [role, setRole] = useState<any>(null);
+    const [loading, setLoading] = useState<any>(false);
 
     const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ const Dashboard = ({ web3auth }: RouterProps) => {
     var base = Airtable.base('appFQhXiLloPeeAQC');
 
     const checkKYB = async () => {
+        setLoading(true);
         var alreadyExists = false;
         if(myBrand !== null) {
             console.log("Brand is not null");
@@ -83,6 +85,7 @@ const Dashboard = ({ web3auth }: RouterProps) => {
                 setBrand("none");
             }
         }
+        setLoading(false);
     }
 
     const getUserInfo = async () => {
