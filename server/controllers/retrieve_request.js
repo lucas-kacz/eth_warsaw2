@@ -1,8 +1,8 @@
 // const providerURL = process.env.INFURA_API_KEY
-var Web3 = require("web3")
-var web3 = new Web3("https://goerli.infura.io/v3/3af4e458905a4581879f74b2239a5852");
+var { Web3 } = require("web3");
+var web3 = new Web3(new Web3.providers.HttpProvider("https://goerli.infura.io/v3/3af4e458905a4581879f74b2239a5852"));
 
-const { ERC20ABI } = require('../constants/abi')
+const { ERC20ABI } = require('../constants/abi');
 
 const { RequestNetwork, Types } = require("@requestnetwork/request-client.js");
 const requestClient = new RequestNetwork({
@@ -10,7 +10,6 @@ const requestClient = new RequestNetwork({
     baseURL: "https://goerli.gateway.request.network/",
     },
 });
-  
 
 async function sortAll(data){
     var list = []

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@nextui-org/react";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip} from "@nextui-org/react";
 import RPC from "../utils/ethersRPC"
 
 interface RouterProps {
@@ -10,6 +10,11 @@ interface RouterProps {
 
 
 const InvoicePaymentPay = ({ web3auth, account }: RouterProps) => {
+
+    if(web3auth === null) {
+        window.location.href = "/";
+    }
+  
     const [invoices, setInvoices] = useState<any>([]);
     const [privateKey, setPrivateKey] = useState<any>(null);
 

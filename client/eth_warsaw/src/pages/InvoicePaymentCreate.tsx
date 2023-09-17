@@ -13,6 +13,10 @@ interface RouterProps {
 
 const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
 
+    if(web3auth === null) {
+      window.location.href = "/";
+    }
+
     const { RequestNetwork } = require("@requestnetwork/request-client.js")
     const {EthereumPrivateKeySignatureProvider} = require("@requestnetwork/epk-signature");
     const { Types, Utils } = require("@requestnetwork/request-client.js"); 
@@ -23,9 +27,9 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
     const [payer, setPayer] = useState<any>(null);
     const [currency, setCurrency] = useState<any>(null);
     const [amount, setAmount] = useState<any>(null);
-	const [selectedPayer, setSelectedPayer] = useState<any>([]);
-	const [reason, setReason] = useState<any>(null);
-	const [dueDate, setDueDate] = useState<any>(null);
+    const [selectedPayer, setSelectedPayer] = useState<any>([]);
+    const [reason, setReason] = useState<any>(null);
+    const [dueDate, setDueDate] = useState<any>(null);
 
     const allCurrencies = {
 		ETH: "ethereum",
@@ -131,7 +135,7 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
 					}}
 				>
 					{Object.keys(allCurrencies).map((currencyKey, index) => (
-						<SelectItem key={index} value={currencyKey}>
+						<SelectItem key={index} value={currencyKey} color="primary">
 							{currencyKey}
 						</SelectItem>
 					))}
@@ -155,7 +159,7 @@ const InvoicePaymentCreate = ({ web3auth, account }: RouterProps) => {
                   onChange={(e) => setAmount(e.target.value)}
                 />
                 {
-                  payer !== null && currency !== null && amount !== null ?
+                  payer !== null && currency !== null && amount !== null && reason !== null && dueDate !== null ?
                   <Button onClick={createPayment} className="width-25" color="success">Create Payment</Button>
                   :
                   <Button onClick={createPayment} className="width-25 disabled" disabled>Create Payment</Button>

@@ -1,0 +1,9 @@
+# server
+
+/server/.env
+/server/node_modules
+
+# client
+
+/client/eth_warsaw/.env
+/client/eth_warsaw/node_modules
