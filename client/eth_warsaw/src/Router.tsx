@@ -17,9 +17,6 @@ interface RouterProps {
   }
 
 function Router ({ web3auth, account, provider }: RouterProps) {
-
-    console.log(provider)
-
     return(
         <Routes>
             <Route path="/" element={<Dashboard web3auth={web3auth} />} />

@@ -24,8 +24,6 @@ import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 
 const clientId = process.env.REACT_APP_CLIENT_ID || "";
 
-console.log("clientId: ", clientId);
-
 function App() {
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [torusPlugin, setTorusPlugin] =
@@ -214,7 +212,6 @@ function App() {
       }
       const rpc = new RPC(provider);
       const privateKey = await rpc.getPrivateKey();
-      console.log("privateKey1:", privateKey);
       setPrivateKey(privateKey);
     } catch (error) {
       console.error(error);
@@ -229,49 +226,51 @@ function App() {
       const rpc = new RPC(provider);
       const accounts = await rpc.getAccounts();
       setAccount(accounts.toString());
-      console.log("account:", accounts.toString());
     } catch (error) {
       console.error(error);
     }
   };
 
   const getUserInfo = async () => {
-    try {
-      if (!provider || !web3auth) {
-        return("web3auth not initialized yet");
-      }
-      else {
-        try {
-        const user = await web3auth.getUserInfo();
-        console.log("user:", user.profileImage);
-        setUser(user)
-        return(user);
+    if(loggedIn) {
+      try {
+        if (!provider || !web3auth) {
+          return("web3auth not initialized yet");
         }
-        catch (error) {
-          console.error(error);
+        else {
+          try {
+          const user = await web3auth.getUserInfo();
+          setUser(user)
+          return(user);
+          }
+          catch (error) {
+            console.error(error);
+          }
         }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
     }
   };
 
   useEffect(() => {
-    try {
-      getPrivateKey();
-      getAccounts();
-      getUserInfo();
-    } catch (error) {
-      console.error(error);
+    if(loggedIn) {
+      try {
+        getPrivateKey();
+        getAccounts();
+        getUserInfo();
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }, [provider, web3auth]);
+  }, [provider, web3auth, loggedIn]);
 
   const handleMouseEnter = () => {
-    setShowSubElements(true);
+    if(loggedIn) setShowSubElements(true);
   };
 
   const handleMouseLeave = () => {
-    setShowSubElements(false);
+    if(loggedIn) setShowSubElements(false);
   };
 
   const [showSubElements, setShowSubElements] = useState(false);
@@ -284,7 +283,7 @@ function App() {
 
   const Navbar = ({ logout, login, user }: RouterProps) => {
     return (
-      <nav>Alexandre Gros
+      <nav>
         <ul className="navbar">
           {
             loading ? (
@@ -300,13 +299,26 @@ function App() {
                   <>
                     {
                       user !== null &&
-                      <div className="flex-100 radius-full margin-bottom-50">
-                        <img src={user.profileImage} alt="profileImage" width="40" height="40" />
-                        <User
-                          name={user.name}
-                          description={user.email}
-                        />
-                      </div>
+                      <>
+                        {
+                          user.profileImage === undefined ?
+                          <div className="flex-100 radius-full margin-bottom-50">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/340px-Default_pfp.svg.png" alt="profileImage" width="40" height="40" />
+                            <User
+                              name={user.email.split("@")[0]}
+                              description={user.email}
+                            />
+                          </div>
+                          :
+                          <div className="flex-100 radius-full margin-bottom-50">
+                            <img src={user.profileImage} alt="profileImage" width="40" height="40" />
+                            <User
+                              name={user.name}
+                              description={user.email}
+                            />
+                          </div>
+                        }
+                      </>
                     }
                     <li className='navbar_element'>
                       <i className="fa fa-home"></i>
